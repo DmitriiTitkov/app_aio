@@ -1,6 +1,8 @@
 from aiohttp import web
+from  service.snmp import get_snmp_value
 import templates
 import aiohttp_jinja2
+
 
 
 def template(*args):
@@ -16,5 +18,6 @@ async def home(request: web.Request):
 
 @aiohttp_jinja2.template('home.html')
 async def home_post(request: web.Request):
-    print("home_post")
+    # Some Validation here
+    get_snmp_value(1)
     return {'test': "testVal"}
