@@ -20,7 +20,7 @@ async def home(request: web.Request):
 @aiohttp_jinja2.template('home.html')
 async def home_post(request: web.Request):
 
-    data = await request.post()
+    data = request.post()
     oid = data.get("snmp_oid")
 
     # validation
