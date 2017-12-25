@@ -12,12 +12,15 @@
 <form name="switch" method="post" action="/">
     <p>Enter snmp OID</p>
     <input type="text" name="snmp_oid">
-    <input type="submit" name = "submit" value="submit" >
+    <input type="checkbox" name="GetSubtree">
+    <span>Get subtree</span>
+    <p><input type="submit" name = "submit" value="submit" ></p>
 </form>
 
 <p>Result:</p>
-<p>{{ test }}</p>
-
+{% for item in SnmpReply %}
+  <li>{{ item }}</a></li>
+{% endfor %}
 
 </body>
 </html>
