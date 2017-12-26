@@ -10,7 +10,7 @@ async def home(request: web.Request):
     pass
 
 
-@aiohttp_jinja2.template('home.html')
+#@aiohttp_jinja2.template('home.html')
 async def home_post(request: web.Request):
 
     data = await request.post()
@@ -21,7 +21,7 @@ async def home_post(request: web.Request):
     # validation
     if not oid:
         return web.HTTPBadRequest(reason="OID is empty")
-    valid_oid_symbols = re.compile('\.|\d')
+    valid_oid_symbols = re.compile('^(\.|\d)+$')
 
     if not valid_oid_symbols.match(oid):
         return web.HTTPBadRequest(reason="OID is not Valid")
@@ -36,7 +36,8 @@ async def home_post(request: web.Request):
 
     if snmp_result.has_error:
         return {'test': "Nothing was found. Check if the OID correct."}
-    return {'SnmpReply': snmp_result.value}
+    reply = {'SnmpReply': snmp_result.value}
+    return web.json_response(reply, status=200)
 
 
 

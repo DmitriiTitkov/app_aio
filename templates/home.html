@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>HomePage</title>
+    <script type="text/javascript" src="../static/js/jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="../static/js/home.js"></script>
+
 </head>
 <body>
 <b>This is the homepage!</b>
 
 
-<form name="switch" method="post" action="/">
+<form id="snmpForm" >
     <p>Enter snmp OID</p>
     <input type="text" name="snmp_oid">
     <input type="checkbox" name="GetSubtree">
@@ -17,10 +19,9 @@
     <p><input type="submit" name = "submit" value="submit" ></p>
 </form>
 
-<p>Result:</p>
-{% for item in SnmpReply %}
-  <li>{{ item }}</a></li>
-{% endfor %}
+<p id="snmpResultHeader"></p>
+<p id="snmpResult"></p>
+
 
 </body>
 </html>
