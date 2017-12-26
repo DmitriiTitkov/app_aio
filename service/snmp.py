@@ -25,7 +25,7 @@ class Snmp:
         snmp_value = list()
         snmp_value.append(var_binds[0].prettyPrint())
 
-        if "No Such Object currently exists at this OID" in snmp_value:
+        if "No Such Object currently exists at this OID" in snmp_value[0]:
             return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
         return SnmpReply(has_error=False, error="", value=snmp_value)
 
@@ -50,11 +50,7 @@ class Snmp:
         for var_bind in var_binds:
             snmp_value.append(var_bind[0].prettyPrint())
 
-        if "No Such Object currently exists at this OID" in snmp_value:
+        if "No Such Object currently exists at this OID" in (value for value in snmp_value):
             return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
 
         return SnmpReply(has_error=False, error="", value=snmp_value)
-
-
-
-# res = asyncio.get_event_loop().run_until_complete(get_snmp_value((1, 3)))
