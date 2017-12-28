@@ -1,8 +1,9 @@
 $(function(){
 	$("#snmpForm").on('submit', function(e){
 		e.preventDefault();
+		var url = "/snmp/get_by_oid"
 		$.ajax({
-			url: '/',
+			url: url,
 			type: 'POST',
 			dataType: 'json',
 			data: $('#snmpForm').serialize()
