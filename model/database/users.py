@@ -2,7 +2,7 @@ import asyncpg
 
 
 class Users:
-    def __init__(self, pool):
+    def __init__(self, pool) -> list:
         self.__pool: asyncpg.pool.Pool = pool
 
     async def get_all_users(self)-> list:
@@ -21,3 +21,21 @@ class Users:
                     'password': row[1]
                     })
         return data
+
+    async def get_user(self, user_name: str) -> dict:
+        async with self.__pool.acquire() as con:
+            row = await con.fetchrow("""
+                SELECT 
+                    login,
+                    password 
+                FROM 
+                    users
+                WHERE
+                    login = $1
+                """, user_name)
+            return {
+                    'login': row[0],
+                    'password': row[1]
+                    }
+
+

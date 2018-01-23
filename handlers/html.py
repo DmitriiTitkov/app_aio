@@ -4,41 +4,45 @@ from utils.objects import SnmpReply
 import re
 import aiohttp_jinja2
 
+valid_oid_symbols = re.compile('^(\.|\d)+$')
 
 @aiohttp_jinja2.template('home.html')
 async def home(request: web.Request):
     pass
 
 
-# @aiohttp_jinja2.template('home.html')
-async def home_post(request: web.Request):
+async def validate_oid(oid):
+    if oid and valid_oid_symbols.match(oid) and len(oid) > 1:
+        return True
+    return False
 
+
+async def get_by_oid(request: web.Request):
     data = await request.post()
     oid = data.get("snmp_oid")
-    is_bulk = data.get("GetSubtree")
-    print(is_bulk)
 
     # validation
-    if not oid:
-        return web.HTTPBadRequest(reason="OID is empty")
-    valid_oid_symbols = re.compile('^(\.|\d)+$')
-
-    if not valid_oid_symbols.match(oid):
+    if not await validate_oid(oid):
         return web.HTTPBadRequest(reason="OID is not Valid")
 
-    if len(oid) == 1:
-        oid = tuple(oid)
-
-    if is_bulk:
-        snmp_result: SnmpReply = await Snmp.get_snmp_bulk(oid)
-    else:
-        snmp_result: SnmpReply = await Snmp.get_snmp_value(oid)
+    snmp_result: SnmpReply = await Snmp.get_snmp_value(oid)
 
     if snmp_result.has_error:
-        return web.HTTPBadRequest(reason="Nothing was found. Check if the OID correct.")
+        return web.HTTPBadRequest(reason="An error occured in snmp request. Check if the OID correct. Error: " + snmp_result.error)
     reply = {'SnmpReply': snmp_result.value}
     return web.json_response(reply, status=200)
 
 
+async def get_by_oid_bulk(request: web.Request):
+    data = await request.post()
+    oid = data.get("snmp_oid")
+    # validation
+    if not await validate_oid(oid):
+        return web.HTTPBadRequest(reason="OID is not Valid")
 
+    snmp_result: SnmpReply = await Snmp.get_snmp_bulk(oid)
 
+    if snmp_result.has_error:
+        return web.HTTPBadRequest(reason="An error occured in snmp request. Check if the OID correct. Error: " + snmp_result.error)
+    reply = {'SnmpReply': snmp_result.value}
+    return web.json_response(reply, status=200)

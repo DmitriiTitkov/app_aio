@@ -1,5 +1,6 @@
 from utils.objects import SnmpReply
 from pysnmp.hlapi.asyncio import *
+from pysnmp.error import PySnmpError
 
 
 class Snmp:
@@ -16,16 +17,15 @@ class Snmp:
                              ObjectType(ObjectIdentity(oid))
                              )
             print(error_indication, error_status, error_index, var_binds)
-        except:
-            return SnmpReply(has_error=True, error="")
+        except PySnmpError:
+            return SnmpReply(has_error=True, error="PySnmpError has been raised in get_snmp_value method")
 
         if error_indication:
-            return SnmpReply(has_error=True, error="")
+            return SnmpReply(has_error=True, error=error_status)
 
-        snmp_value = list()
-        snmp_value.append(var_binds[0].prettyPrint())
+        print(var_binds[0].prettyPrint())
 
-        if "No Such Object currently exists at this OID" in snmp_value[0]:
+        if "No Such Object currently exists at this OID" in var_binds[0].prettyPrint():
             return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
         return SnmpReply(has_error=False, error="", value=snmp_value)
 
@@ -36,12 +36,12 @@ class Snmp:
                 await bulkCmd(SnmpEngine(), CommunityData('public'),
                               UdpTransportTarget((host_ip, 161)),
                               ContextData(),
-                              0, 50,
+                              0, 25,
                               ObjectType(ObjectIdentity(oid))
                               )
             print(error_indication, error_status, error_index, var_binds)
-        except:
-            return SnmpReply(has_error=True, error="")
+        except PySnmpError:
+            return SnmpReply(has_error=True, error="PySnmpError has been raised in get_snmp_bulk method")
 
         if error_indication:
             return SnmpReply(has_error=True, error=error_status)

@@ -1,7 +1,14 @@
 $(function(){
 	$("#snmpForm").on('submit', function(e){
 		e.preventDefault();
-		var url = "/snmp/get_by_oid"
+		var getSubtreeCheckBox = $('#snmpForm [name="GetSubtree"]')
+		if(getSubtreeCheckBox.prop("checked") == true){
+			var url = "/snmp/getBulk_by_oid"
+		}
+		else{
+			var url = "/snmp/get_by_oid"
+		}
+		
 		$.ajax({
 			url: url,
 			type: 'POST',
