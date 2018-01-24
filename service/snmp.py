@@ -23,11 +23,11 @@ class Snmp:
         if error_indication:
             return SnmpReply(has_error=True, error=error_status)
 
-        print(var_binds[0].prettyPrint())
+        result = var_binds[0].prettyPrint()
 
-        if "No Such Object currently exists at this OID" in var_binds[0].prettyPrint():
+        if "No Such Object currently exists at this OID" in result:
             return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
-        return SnmpReply(has_error=False, error="", value=snmp_value)
+        return SnmpReply(has_error=False, error="", value=result)
 
     @staticmethod
     async def get_snmp_bulk(oid: tuple,  host_ip='192.168.63.10') -> SnmpReply:
@@ -46,11 +46,9 @@ class Snmp:
         if error_indication:
             return SnmpReply(has_error=True, error=error_status)
 
-        snmp_value = list()
-        for var_bind in var_binds:
-            snmp_value.append(var_bind[0].prettyPrint())
-
-        if "No Such Object currently exists at this OID" in (value for value in snmp_value):
-            return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
+        snmp_value = [var_bind[0].prettyPrint() for var_bind in var_binds]
+        for value in snmp_value:
+            if "No Such Object currently exists at this OID" in value:
+                return SnmpReply(has_error=True, error="No Such Object currently exists at this OID")
 
         return SnmpReply(has_error=False, error="", value=snmp_value)

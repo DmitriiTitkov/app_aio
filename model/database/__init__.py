@@ -6,6 +6,7 @@ from .users import Users
 class Database:
     def __init__(self):
         self.config = {}
+        self.pool: asyncpg.pool.Pool = None
 
     @classmethod
     async def create(cls, app: web.Application):

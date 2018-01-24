@@ -18,8 +18,10 @@ async def validate_oid(oid):
 
 
 async def get_by_oid(request: web.Request):
-    data = await request.post()
-    oid = data.get("snmp_oid")
+
+    print(await request.text())
+    json_data = await request.json()
+    oid = json_data["snmp_oid"]
 
     # validation
     if not await validate_oid(oid):
@@ -34,8 +36,11 @@ async def get_by_oid(request: web.Request):
 
 
 async def get_by_oid_bulk(request: web.Request):
-    data = await request.post()
-    oid = data.get("snmp_oid")
+
+    print(await request.text())
+    json_data = await request.json()
+    oid = json_data["snmp_oid"]
+
     # validation
     if not await validate_oid(oid):
         return web.HTTPBadRequest(reason="OID is not Valid")

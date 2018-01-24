@@ -8,15 +8,16 @@ $(function(){
 		else{
 			var url = "/snmp/get_by_oid"
 		}
-		
+
 		$.ajax({
 			url: url,
 			type: 'POST',
 			dataType: 'json',
-			data: $('#snmpForm').serialize()
+			data: JSON.stringify(translateToJSON($('#snmpForm')))
 		})
 		.done(function(res) {
 			if(res){
+				console.log(typeof(res["SnmpReply"]))
 				var resultStr = ''
 				for(var k in res["SnmpReply"]) {
 	   				resultStr += "<li>" + res["SnmpReply"][k] + "</li>";
@@ -27,7 +28,7 @@ $(function(){
 		})
 		.fail(function(error) {
 			showResult(error.statusText, true);
-		})
+		}) 
 	
 		
 	})
@@ -50,3 +51,12 @@ function showResult(formattedResult, error=false){
 	$("#snmpResult").html(formattedResult);
 }
 
+ function translateToJSON($form){
+ 	var unindexedArray = $form.serializeArray();
+ 	var indexedArray = {};
+ 	$.map(unindexedArray, function(index, elem) {
+ 		indexedArray[index['name']] = index['value'];
+
+ 	});
+ 	return indexedArray;
+ }
