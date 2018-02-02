@@ -17,7 +17,7 @@ async def validate_oid(oid):
     return False
 
 
-async def get_by_oid(request: web.Request):
+async def get(request: web.Request):
 
     print(await request.text())
     json_data = await request.json()
@@ -27,7 +27,7 @@ async def get_by_oid(request: web.Request):
     if not await validate_oid(oid):
         return web.HTTPBadRequest(reason="OID is not Valid")
 
-    snmp_result: SnmpReply = await Snmp.get_snmp_value(oid)
+    snmp_result: SnmpReply = await request.app['snmp'].get(oid)
 
     if snmp_result.has_error:
         return web.HTTPBadRequest(reason="An error occured in snmp request. Check if the OID correct. Error: " + snmp_result.error)
@@ -35,17 +35,18 @@ async def get_by_oid(request: web.Request):
     return web.json_response(reply, status=200)
 
 
-async def get_by_oid_bulk(request: web.Request):
+async def bulk_walk(request: web.Request):
 
     print(await request.text())
     json_data = await request.json()
     oid = json_data["snmp_oid"]
 
     # validation
+
     if not await validate_oid(oid):
         return web.HTTPBadRequest(reason="OID is not Valid")
 
-    snmp_result: SnmpReply = await Snmp.get_snmp_bulk(oid)
+    snmp_result: SnmpReply = await request.app['snmp'].bulk_walk(oid)
 
     if snmp_result.has_error:
         return web.HTTPBadRequest(reason="An error occured in snmp request. Check if the OID correct. Error: " + snmp_result.error)
