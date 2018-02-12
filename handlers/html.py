@@ -12,9 +12,7 @@ async def home(request: web.Request):
 
 
 async def validate_oid(oid):
-    if oid and valid_oid_symbols.match(oid) and len(oid) > 1:
-        return True
-    return False
+    return oid and valid_oid_symbols.match(oid) and len(oid) > 1
 
 
 async def get(request: web.Request):
