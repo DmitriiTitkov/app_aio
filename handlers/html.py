@@ -19,7 +19,7 @@ async def get(request: web.Request):
 
     print(await request.text())
     json_data = await request.json()
-    oid = json_data["snmp_oid"]
+    oid = json_data.get("snmp_oid", None)
 
     # validation
     if not await validate_oid(oid):
@@ -37,7 +37,7 @@ async def bulk_walk(request: web.Request):
 
     print(await request.text())
     json_data = await request.json()
-    oid = json_data["snmp_oid"]
+    oid = json_data.get("snmp_oid", None)
 
     # validation
 
