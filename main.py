@@ -9,16 +9,24 @@ import json
 import aiohttp_jinja2
 import jinja2
 import aioredis
-from model.database import Database
+from model import Database
 import datetime
+import asyncpg
+from typing import Callable
 
 
-async def get_redis_pool(*args):
+async def get_redis_pool() -> aioredis.pool.ConnectionsPool:
     return await aioredis.create_pool('redis://localhost', minsize=5, maxsize=10)
 
 
+async def create_pool(config: dict =json.load(open('config.json'))) -> asyncpg.pool.Pool:
+    return await asyncpg.create_pool(config["databaseconfig"]["dsn"],
+                                     min_size=config["databaseconfig"]["minsize"],
+                                     timeout=config["databaseconfig"]["timeout"])
+
+
 @web.middleware
-async def error_middleware(request: web.Request, handler):
+async def error_middleware(request: web.Request, handler: Callable) -> web.Response:
     try:
         response: web.Response = await handler(request)
         return response
@@ -30,29 +38,32 @@ async def error_middleware(request: web.Request, handler):
 
 
 @web.middleware
-async def user_middleware(request: web.Request, handler):
+async def user_middleware(request: web.Request, handler: Callable)-> web.Response:
     session = await get_session(request)
     if not session.empty:
-        session['last_vizited'] = datetime.datetime.now().isoformat()
+        session['last_visited'] = datetime.datetime.now().isoformat()
     if session.get('user', None):
         request["user"] = session['user']
-        request['last_vizited'] = session['last_vizited']
+        request['last_visited'] = session['last_visited']
 
     return await handler(request)
 
 
 loop = asyncio.get_event_loop()
+pg_pool = loop.run_until_complete(create_pool())
+db = Database(pg_pool)
 redis = loop.run_until_complete(get_redis_pool())
+print(type(redis))
 storage = RedisStorage(redis)
 session_middleware = aiohttp_session.session_middleware(storage)
 
 app = web.Application(middlewares=[session_middleware, error_middleware, user_middleware])
 add_routes(app)
 aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
-app['database_config'] = json.load(open('config/database.json'))
+
+app['database'] = db
 app['snmp'] = Snmp("192.168.63.10", 161, "public")
 
-app.on_startup.append(Database.create)
 app.on_cleanup.append(Database.close)
 
 # web.run_app(app)

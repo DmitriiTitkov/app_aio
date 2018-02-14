@@ -2,8 +2,8 @@ import asyncpg
 
 
 class Users:
-    def __init__(self, pool) -> list:
-        self.__pool: asyncpg.pool.Pool = pool
+    def __init__(self, pool: asyncpg.pool.Pool) -> None:
+        self.__pool = pool
 
     async def get_all_users(self)-> list:
         async with self.__pool.acquire() as con:

@@ -1,10 +1,10 @@
 from aiohttp import web
-from service.snmp import Snmp
-from utils.objects import SnmpReply
+from service.snmp import SnmpReply
 import re
 import aiohttp_jinja2
 
 valid_oid_symbols = re.compile('^(\.|\d)+$')
+
 
 @aiohttp_jinja2.template('home.html')
 async def home(request: web.Request):
@@ -47,6 +47,6 @@ async def bulk_walk(request: web.Request):
     snmp_result: SnmpReply = await request.app['snmp'].bulk_walk(oid)
 
     if snmp_result.has_error:
-        return web.HTTPBadRequest(reason="An error occured in snmp request. Check if the OID correct. Error: " + snmp_result.error)
+        return web.HTTPBadRequest(reason="An error occurred in snmp request. Check if the OID correct. Error: " + snmp_result.error)
     reply = {'SnmpReply': snmp_result.value}
     return web.json_response(reply, status=200)
