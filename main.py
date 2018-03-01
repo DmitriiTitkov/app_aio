@@ -12,7 +12,10 @@ import aioredis
 from model import Database
 import datetime
 import asyncpg
+import os
 from typing import Callable
+from aiohttp_apiset.middlewares import jsonify
+from aiohttp_apiset import SwaggerRouter
 
 
 async def get_redis_pool() -> aioredis.pool.ConnectionsPool:
@@ -53,17 +56,20 @@ loop = asyncio.get_event_loop()
 pg_pool = loop.run_until_complete(create_pool())
 db = Database(pg_pool)
 redis = loop.run_until_complete(get_redis_pool())
-print(type(redis))
+
 storage = RedisStorage(redis)
 session_middleware = aiohttp_session.session_middleware(storage)
 
-app = web.Application(middlewares=[session_middleware, error_middleware, user_middleware])
+dir_path = os.path.dirname(os.path.realpath(__file__))
+router = SwaggerRouter(search_dirs=[dir_path], swagger_ui='/api/', default_validate=True)
+
+app = web.Application(router=router, middlewares=[session_middleware, error_middleware, user_middleware, jsonify])
 add_routes(app)
 aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 
 app['database'] = db
 app['snmp'] = Snmp("192.168.63.10", 161, "public")
-
+# setup_swagger(app)
 app.on_cleanup.append(Database.close)
 
 # web.run_app(app)

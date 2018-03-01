@@ -8,10 +8,11 @@ $(function(){
 		else{
 			var url = "/snmp/get_by_oid"
 		}
-
+		console.log(JSON.stringify(translateToJSON($('#snmpForm'))))
 		$.ajax({
 			url: url,
 			type: 'POST',
+			contentType: "application/json",
 			dataType: 'json',
 			data: JSON.stringify(translateToJSON($('#snmpForm')))
 		})
