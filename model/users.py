@@ -1,4 +1,5 @@
 import asyncpg
+from typing import Union, Dict
 
 
 class Users:
@@ -22,7 +23,7 @@ class Users:
                 })
         return data
 
-    async def get_user(self, user_name: str) -> dict:
+    async def get_user(self, user_name: str) -> Union[Dict[str, str], None]:
         async with self.__pool.acquire() as con:
             row = await con.fetchrow("""
                 SELECT 

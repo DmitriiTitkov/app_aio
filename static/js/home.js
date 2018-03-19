@@ -12,7 +12,7 @@ $(function(){
 		$.ajax({
 			url: url,
 			type: 'POST',
-			contentType: "application/json",
+			
 			dataType: 'json',
 			data: JSON.stringify(translateToJSON($('#snmpForm')))
 		})

@@ -1,15 +1,21 @@
 import aiohttp_jinja2
 from aiohttp_session import get_session
 from aiohttp import web
+from passlib.hash import sha512_crypt
 
 
-@aiohttp_jinja2.template("auth.html")
 async def auth_get(request: web.Request):
-    db = request.app['database']
-    users = await db.users.get_user('test')
-    print(request.get("user", None))
-    print(request.get("last_visited", None))
-    return {'users': users}
+    """ Returns default auth page
+       ---
+      tags:
+      - Authentication
+      description: Returns authentication page
+
+      responses:
+        '200':
+          description: OK
+    """
+    return aiohttp_jinja2.render_template('auth.html', request, {}, app_key=aiohttp_jinja2.APP_KEY, encoding='utf-8')
 
 
 async def auth_post(request: web.Request):
@@ -24,12 +30,12 @@ async def auth_post(request: web.Request):
         schema:
           type: object
           properties:
-            username:
+            login:
                type: string
             password:
                 type: string
           required:
-            - username
+            - login
       responses:
         '200':
           description: OK
@@ -42,14 +48,13 @@ async def auth_post(request: web.Request):
     """
     authenticated = False
     json_data = await request.json()
-    username = json_data.get("username", None)
+    login = json_data.get("login", None)
     password = json_data.get("password", None)
     db = request.app['database']
 
-    user_data = await db.users.get_user(username)
+    user_data = await db.users.get_user(login)
     if user_data:
-        # TODO CRYPT PASSWORD
-        if user_data["password"] == password:
+        if sha512_crypt.verify(password, user_data["password"]):
             authenticated = True
 
     response_data = {
@@ -57,13 +62,25 @@ async def auth_post(request: web.Request):
     }
     if authenticated:
         session = await get_session(request)
-        session['user'] = username
+        session['user'] = login
         return web.json_response(response_data, status=200)
     else:
         return web.json_response(response_data, status=401)
 
 
 async def logout(request: web.Request):
+    """ Logout page
+       ---
+      tags:
+      - Authentication
+      description: Logout page
+
+      responses:
+        '200':
+          description: OK
+    """
     session = await get_session(request)
     if session.get("user", None):
         session.clear()
+
+    return aiohttp_jinja2.render_template('logout.html', request, {}, app_key=aiohttp_jinja2.APP_KEY, encoding='utf-8')

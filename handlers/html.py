@@ -6,12 +6,18 @@ import aiohttp_jinja2
 valid_oid_symbols = re.compile('^(\.|\d)+$')
 
 
-@aiohttp_jinja2.template('home.html')
 async def home(request: web.Request):
     """ Returns default home page
+       ---
+      tags:
+      - Home
+      description: Returns home page
 
+      responses:
+        '200':
+          description: OK
     """
-    pass
+    return aiohttp_jinja2.render_template('home.html', request, {}, app_key=aiohttp_jinja2.APP_KEY, encoding='utf-8')
 
 
 def validate_oid(oid):
